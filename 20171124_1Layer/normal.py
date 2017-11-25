@@ -4,6 +4,7 @@ deeplerning に必要なデータを準備する
 """
 from typing import List, Dict, Tuple
 import os
+import sys
 import os.path
 import pickle
 from scipy import ndimage
@@ -120,7 +121,7 @@ def accuracy(predictions, labels):
     """
     正答率を示す
     """
-    return (100.0 * np.sum(np.argmax(predictions, 1) == np.argmax(labels, 1)) / predictions.shape[0])
+    return (np.sum(np.argmax(predictions, 1) == np.argmax(labels, 1)) / predictions.shape[0])
 
 def learningNormal(datasets: Datasets, train_subset: int):
     """
@@ -161,9 +162,10 @@ def learningNormal(datasets: Datasets, train_subset: int):
     num_steps = 20000
 
     # 実行
+    print("step,loss,traning accuracy,validation accuracy,test accuracy")
     with tf.Session(graph=graph) as session:
         # これは一度の演算で、パラメータは、乱数の重みを持つ行列と、ゼロのバイアスで初期化される。
-        print('Initialized')
+        sys.stderr.write('Initialized')
         tf.global_variables_initializer().run()
 
         for step in range(num_steps):
@@ -171,13 +173,11 @@ def learningNormal(datasets: Datasets, train_subset: int):
             _, c_loss, predictions = session.run([optimizer, loss, train_prediction])
 
             if step % 100 == 0:
-                print('Loss at step %d: %f' % (step, c_loss))
-                print('Training accuracy: %.1f%%' %
-                      accuracy(predictions, datasets.train.label[:train_subset, :]))
-                print('Validation accuracy: %.1f%%' %
-                      accuracy(valid_prediction.eval(), datasets.valid.label))
-                print('Test accuracy: %.1f%%' %
-                      accuracy(test_prediction.eval(), datasets.test.label))
+                train_accuracy = accuracy(predictions, datasets.train.label[:train_subset, :])
+                valid_accuracy = accuracy(valid_prediction.eval(), datasets.valid.label)
+                test_accuracy = accuracy(test_prediction.eval(), datasets.test.label)
+                print("%5d,%3.6f,%.6f,%.6f,%.6f" %
+                    (step,c_loss,train_accuracy,valid_accuracy,test_accuracy))
 
 def main():
     # データセットの準備

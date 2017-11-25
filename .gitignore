@@ -3,3 +3,4 @@
 .python-version
 notMNIST_large
 notMNIST_small
+*.csv
