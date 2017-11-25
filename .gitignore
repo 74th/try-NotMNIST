@@ -1,0 +1,5 @@
+*.pickle
+.mypy_cache/
+.python-version
+notMNIST_large
+notMNIST_small
